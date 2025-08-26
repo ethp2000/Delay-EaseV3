@@ -1,0 +1,32 @@
+# Virtual environment
+venv/
+
+# IDE settings
+.vscode/
+
+# macOS system files
+.DS_Store
+**/.DS_Store
+
+# External packages directory
+browser-use-delay-ease/
+
+# Environment variables
+.env
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Stuff you want git to ignore 
+
+*.pyc
+
+*.pyo
+
+*.pyd
+
+*.pyw
