@@ -176,27 +176,3 @@ def extract_ticket_details(image_path: str) -> dict:
     
     return validated_data
 
-if __name__ == "__main__":
-    image_path = get_data_path("eticket_test1.png")
-    ticket_data = extract_ticket_details(image_path)
-    
-    print("extracted ticket data:")
-    print(json.dumps(ticket_data, indent=2))
-    
-    if "error" in ticket_data:
-        print("\nerror:", ticket_data["error"])
-    else:
-        if "segments" in ticket_data:
-            print("\nmulti-leg journey detected:")
-            for i, seg in enumerate(ticket_data["segments"], start=1):
-                print(f"  segment {i}: {seg}")
-        else:
-            print("\nsingle journey:")
-            print(ticket_data)
-    
-    base_filename = os.path.basename(image_path)
-    output_filename = get_data_path(base_filename.replace(".png", "_details.json"))
-    with open(output_filename, "w") as outfile:
-        json.dump(ticket_data, outfile, indent=2)
-    
-    print(f"\nsaved to {output_filename}")

@@ -4,7 +4,7 @@ import json
 import asyncio
 import datetime
 from pathlib import Path
-from delay_calculation import Delay_calc
+from delay_calculation import calculate_delay_compensation
 from browser_automation_type_a import run_type_a_automation,is_type_a_toc
 from dotenv import load_dotenv
 
@@ -115,7 +115,7 @@ def process_single_ticket(image_path: str, user_id: str = "test_user") -> dict:
     try:
         # phase 1 & 2: extract ticket data and check eligibility
         print("Analyzing ticket and checking for delays...")
-        ticket_data = Delay_calc(image_path)
+        ticket_data = calculate_delay_compensation(image_path)
         ticket_data["image_path"] = os.path.abspath(image_path)
         
         display_status_message(ticket_data)

@@ -313,7 +313,7 @@ def filter_crucial_info(ticket_data):
         # single leg journey - filter the ticket data directly
         return {k: ticket_data.get(k, "") for k in crucial_fields if k in ticket_data}
 
-def Delay_calc(image_path, toc_csv_filename="toc_code.csv", delay_csv_filename="delay_repay_percentages_single_tickets.csv") -> dict:
+def calculate_delay_compensation(image_path, toc_csv_filename="toc_code.csv", delay_csv_filename="delay_repay_percentages_single_tickets.csv") -> dict:
     """main function - extract ticket data and calculate delay compensation"""
     extracted_data = extract_ticket_details(image_path)
     
@@ -383,19 +383,3 @@ def Delay_calc(image_path, toc_csv_filename="toc_code.csv", delay_csv_filename="
         result = process_ticket_delay(extracted_data, toc_csv_filename, delay_csv_filename)
     
     return filter_crucial_info(result)
-
-if __name__ == "__main__":
-    image_path = get_data_path("eticket_test1.png") 
-    final_ticket_data = Delay_calc(
-        image_path, 
-        toc_csv_filename=get_data_path("toc_code.csv"),  
-        delay_csv_filename=get_data_path("delay_repay_percentages_single_tickets.csv")  
-    )
-    print("Final Ticket Data with Delay and Compensation Info:")
-    print(json.dumps(final_ticket_data, indent=2))
-    
-    base_filename = os.path.basename(image_path)
-    output_filename = get_data_path(base_filename.replace(".png", "_final.json"))  
-    with open(output_filename, "w") as outfile:
-        json.dump(final_ticket_data, outfile, indent=2)
-    print(f"Saved final ticket data to {output_filename}")

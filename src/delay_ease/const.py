@@ -18,4 +18,4 @@ ALLOWED_DOMAINS=[
             'https://delayrepay.gwr.com',                       # Great Western Railway
             'https://delayrepay.northernrailway.co.uk',         # Northern
             'https://delayrepay.southwesternrailway.com'        # South Western Railway & Island Line
-        ]
+]
