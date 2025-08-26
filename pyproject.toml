@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "delay-ease"
+version = "0.2.0"
+description = ""
+authors = ["Ethan P"]
+readme = "README.md"
+packages = [{include = "delay_ease", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<4.0"
+requests = ">=2.32.3,<3.0.0"
+openai = ">=1.68.2,<2.0.0"
+browser-use = "^0.1.40"
+python-dotenv = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
