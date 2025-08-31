@@ -80,12 +80,20 @@ def display_status_message(ticket_data: dict):
         compensation = ticket_data.get("compensation_percentage", "Unknown")
         delay = ticket_data.get("delay_minutes", 0)
         toc = ticket_data.get("train_operator", "Unknown")
+        dep_station = ticket_data.get("departure_station", "Unknown")
+        arr_station = ticket_data.get("arrival_station", "Unknown")
+        dep_time = ticket_data.get("departure_time", "Unknown")
+        journey_date = ticket_data.get("ticket_date", "Unknown")
 
         print("ELIGIBLE FOR COMPENSATION!")
         print("="*60)
         print(f"{message}")
         print(f"\nDetails:")
         print(f"   Operator: {toc}")
+        print(f"   From: {dep_station}")
+        print(f"   To: {arr_station}")
+        print(f"   Date: {journey_date}")
+        print(f"   Departure time: {dep_time}")
         print(f"   Delay: {delay} minutes")
         print(f"   Compensation: {compensation}")
         
@@ -95,7 +103,7 @@ def display_status_message(ticket_data: dict):
             
     elif status.startswith("error"):
         print("ERROR PROCESSING TICKET")
-        
+        print(f"{message}")
         
     else:
         print(f"STATUS: {status.upper()}")

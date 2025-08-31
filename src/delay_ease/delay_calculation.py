@@ -144,13 +144,14 @@ def get_delay_repay_percentage(delay_minutes: float, operator: str, csv_filename
         return "Unknown"
 
 def get_detailed_status_message(delay_minutes: float, operator: str, days_old: int, compensation_pct: str) -> dict:
-    if days_old > 28:
-        return {
-            "status": "ineligible_age",
-            "message": f"Your journey was {days_old} days ago, which exceeds the 28-day claim window. UK delay repay claims must be submitted within 28 days of travel.",
-            "next_action": "learn_more",
-            "learn_more_topic": "claim_deadlines"
-        }
+    # TEST OVERRIDE: Temporarily disable 28-day claim window block
+    # if days_old > 28:
+    #     return {
+    #         "status": "ineligible_age",
+    #         "message": f"Your journey was {days_old} days ago, which exceeds the 28-day claim window. UK delay repay claims must be submitted within 28 days of travel.",
+    #         "next_action": "learn_more",
+    #         "learn_more_topic": "claim_deadlines"
+    #     }
     
     min_delay = get_toc_minimum_delay(operator)
     
@@ -193,11 +194,12 @@ def process_ticket_delay(ticket_data, toc_csv_filename="toc_code.csv", delay_csv
     parsed_date = datetime.datetime.strptime(ticket_data["ticket_date"], "%d %b %Y")
     days_old = (datetime.datetime.now() - parsed_date).days
     
-    if days_old > 28:
-        status_info = get_detailed_status_message(0, "Unknown", days_old, "0%")
-        ticket_data["delay_status"] = "Ticket is older than 28 days"  
-        ticket_data.update(status_info)  
-        return ticket_data
+    # TEST OVERRIDE: Temporarily disable early return for tickets older than 28 days
+    # if days_old > 28:
+    #     status_info = get_detailed_status_message(0, "Unknown", days_old, "0%")
+    #     ticket_data["delay_status"] = "Ticket is older than 28 days"  
+    #     ticket_data.update(status_info)  
+    #     return ticket_data
     
     hsp_date = parsed_date.strftime("%Y-%m-%d")
     ticket_dep_time = ticket_data["departure_time"].replace(":", "")

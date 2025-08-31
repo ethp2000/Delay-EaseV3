@@ -2,9 +2,8 @@ import os
 import asyncio
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-from browser_use import Agent, BrowserSession
-from browser_use.llm import ChatOpenAI
-from delay_calculation import Delay_calc
+from browser_use import Agent, Browser, BrowserProfile, ChatOpenAI
+from delay_calculation import calculate_delay_compensation
 from ticket_data_extraction import extract_ticket_details, get_data_path
 from const import TYPE_A_TOCS, ALLOWED_DOMAINS
 from utils import is_type_a_toc, get_operator_website
@@ -82,15 +81,16 @@ def validate_ticket_matches_journey(ticket_image_path: str, journey_details: dic
         return False
 
 
-async def create_browser_session():
-    """Create a properly configured browser session for delay repay automation"""
-    return BrowserSession(
-        headless=False,  
-        user_data_dir=None,  
-        viewport={'width': 1280, 'height': 720},
-        keep_alive=True,  
+async def create_browser():
+    """Create a properly configured browser for delay repay automation"""
+    browser = Browser(
+        headless=False,
+        user_data_dir=None,
+        window_size={'width': 1280, 'height': 1080},
         allowed_domains=ALLOWED_DOMAINS,
+        keep_alive=True,
     )
+    return browser
 
 async def create_controller():
     """Create controller with file upload capability for ticket uploads"""
@@ -154,10 +154,10 @@ async def run_type_a_automation(
     ticket_image_path: str
 ):
     
-    browser_session = await create_browser_session()
+    browser = await create_browser()
     
     try:
-        llm = ChatOpenAI(model="gpt-4.1", temperature=0.1) 
+        llm = ChatOpenAI(model="o3", ) 
         
         controller = await create_controller()
         print("✅ Controller created for file uploads")
@@ -167,8 +167,8 @@ async def run_type_a_automation(
         login_agent = Agent(
             task=build_login_prompt(operator_website, DELAY_REPAY_EMAIL, DELAY_REPAY_PASSWORD),
             llm=llm,
-            browser_session=browser_session,
-            use_vision=True
+            browser=browser,
+            use_vision=True,
         )
         
         await login_agent.run()
@@ -195,7 +195,7 @@ async def run_type_a_automation(
         journey_agent = Agent(
             task=build_journey_details_prompt(journey_date, departure_station, arrival_station, departure_time, delay_range, delay_minutes),
             llm=llm,
-            browser_session=browser_session,
+            browser=browser,
             use_vision=True
         )
         
@@ -206,9 +206,10 @@ async def run_type_a_automation(
         ticket_agent = Agent(
             task=build_ticket_details_prompt(ticket_image_path),
             llm=llm,
-            browser_session=browser_session,
-            controller=controller,  
+            browser=browser,
             use_vision=True,
+            directly_open_url=False,                 
+            available_file_paths=[ticket_image_path] 
         )
         
         ticket_result = await ticket_agent.run()
@@ -218,7 +219,7 @@ async def run_type_a_automation(
         review_agent = Agent(
             task=build_review_prompt(passenger_details, bank_details, departure_station, arrival_station, journey_date, departure_time, delay_minutes),
             llm=llm,
-            browser_session=browser_session,
+            browser=browser,
             use_vision=True,
         )
         
@@ -226,6 +227,6 @@ async def run_type_a_automation(
         print(f"Review completed: {review_result}")
         
     finally:
-        if browser_session:
-            await browser_session.close()
+        if browser:
+            await browser.close()
             print("Browser session closed")

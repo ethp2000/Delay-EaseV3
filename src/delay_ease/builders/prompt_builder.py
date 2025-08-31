@@ -63,7 +63,7 @@ You are continuing from where the login agent left off. Complete the journey det
 1. Click the "Make a claim" button to start a new claim
 2. You will be on a journey details form with fields for date, stations, and time
 3. IMPORTANT: If an "Info" popup appears, close it by clicking the X button
-4. Select the date: {journey_date} using the calendar widget
+4. Select the date: 11 August 2025 (11/8/2025) using the calendar widget
 5. Enter the departure station: {departure_station} in the "From" field
 6. Enter the arrival station: {arrival_station} in the "To" field
 7. Enter the scheduled departure time: {departure_time} in the "Leaving at" field

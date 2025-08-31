@@ -1,0 +1,15 @@
+{
+  "claim_id": "DE_20250831_133758_test_user_eticket_test1",
+  "user_id": "test_user_eticket_test1",
+  "toc_claim_reference": "INELIGIBLE",
+  "status": "ineligible_age",
+  "toc": "Unknown",
+  "journey_date": "10 Jul 2025",
+  "departure_station": "Ely",
+  "arrival_station": "Cambridge",
+  "delay_minutes": 0,
+  "compensation_percentage": "0%",
+  "compensation_amount": null,
+  "submitted_at": "2025-08-31T13:37:58.554950",
+  "ticket_image_path": "/Users/ethanphillips/Desktop/Delay-EaseV3/data/test_tickets/eticket_test1.png"
+}
