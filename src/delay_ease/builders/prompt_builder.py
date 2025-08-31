@@ -15,6 +15,10 @@ def build_ticket_extraction_prompt() -> str:
         "If the ticket shows multiple segments, return a JSON dictionary with one key 'segments', "
         "whose value is an array of dictionaries, each with the same keys as above (including 'ticket_format'). "
         
+        "Formatting rules (mandatory): "
+        "ticket_date MUST be 'DD Mon YYYY' (e.g., '10 Jul 2025') — do NOT use 'YYYY-MM-DD' or 'DD/MM/YYYY'. "
+        "departure_time MUST be 24-hour 'HH:MM' with leading zeros (e.g., '09:05'). "
+        
         "If the ticket mentions 'London Terminals' but also includes a seat reservation or itinerary "
         "showing a more specific arrival station (e.g., 'London King's Cross'), use that specific station "
         "in 'arrival_station' and the corresponding station code (e.g., 'KGX') in 'arrival_crs'. "
@@ -24,8 +28,7 @@ def build_ticket_extraction_prompt() -> str:
         "Screenshots, mobile displays, or digital images should be marked as 'E-ticket'. "
         
         "Return only valid JSON. Do not include any code blocks, triple backticks, or extra text."
-        )
-
+    )
     return prompt
 
 
