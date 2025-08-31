@@ -4,21 +4,26 @@ import datetime
 import requests
 import base64
 import os
-from dotenv import load_dotenv
 from ticket_data_extraction import extract_ticket_details, get_data_path
 from const import HSP_SERVICE_METRICS_URL, HSP_SERVICE_DETAILS_URL
 
-load_dotenv()
-
-HSP_EMAIL = os.environ.get("HSP_EMAIL", "")
-HSP_PASSWORD = os.environ.get("HSP_PASSWORD", "")
+def get_hsp_credentials():
+    """Get HSP credentials with fail-fast validation"""
+    email = os.environ.get("HSP_EMAIL")
+    password = os.environ.get("HSP_PASSWORD")
+    
+    if not email or not password:
+        raise ValueError("Missing required environment variables: HSP_EMAIL, HSP_PASSWORD")
+    
+    return email, password
 
 def hsp_auth_header(email, password):
     token = base64.b64encode(f"{email}:{password}".encode("utf-8")).decode("utf-8")
     return {"Authorization": f"Basic {token}"}
 
 def get_service_metrics(from_loc, to_loc, from_time, to_time, from_date, to_date, days):
-    headers = {"Content-Type": "application/json", **hsp_auth_header(HSP_EMAIL, HSP_PASSWORD)}
+    hsp_email, hsp_password = get_hsp_credentials()
+    headers = {"Content-Type": "application/json", **hsp_auth_header(hsp_email, hsp_password)}
     payload = {
         "from_loc": from_loc.strip(),
         "to_loc": to_loc.strip(),
@@ -33,7 +38,8 @@ def get_service_metrics(from_loc, to_loc, from_time, to_time, from_date, to_date
     return response.json()
 
 def get_service_details(rid):
-    headers = {"Content-Type": "application/json", **hsp_auth_header(HSP_EMAIL, HSP_PASSWORD)}
+    hsp_email, hsp_password = get_hsp_credentials()
+    headers = {"Content-Type": "application/json", **hsp_auth_header(hsp_email, hsp_password)}
     payload = {"rid": rid.strip()}
     response = requests.post(HSP_SERVICE_DETAILS_URL, json=payload, headers=headers)
     response.raise_for_status()

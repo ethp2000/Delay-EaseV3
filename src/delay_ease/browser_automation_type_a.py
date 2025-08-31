@@ -1,7 +1,6 @@
 import os
 import asyncio
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
 from browser_use import Agent, Browser, BrowserProfile, ChatOpenAI
 from delay_calculation import calculate_delay_compensation
 from ticket_data_extraction import extract_ticket_details, get_data_path
@@ -10,15 +9,15 @@ from utils import is_type_a_toc, get_operator_website
 from builders.func_builder import build_file_input_js
 from builders.prompt_builder import build_login_prompt, build_journey_details_prompt, build_ticket_details_prompt, build_review_prompt
 
-load_dotenv()
-
-
-
-DELAY_REPAY_EMAIL = os.environ.get("DELAY_REPAY_EMAIL")
-DELAY_REPAY_PASSWORD = os.environ.get("DELAY_REPAY_PASSWORD")
-
-if not DELAY_REPAY_EMAIL or not DELAY_REPAY_PASSWORD:
-    raise ValueError("Missing required environment variables: DELAY_REPAY_EMAIL, DELAY_REPAY_PASSWORD")
+def get_delay_repay_credentials():
+    """Get delay repay credentials with fail-fast validation"""
+    email = os.environ.get("DELAY_REPAY_EMAIL")
+    password = os.environ.get("DELAY_REPAY_PASSWORD")
+    
+    if not email or not password:
+        raise ValueError("Missing required environment variables: DELAY_REPAY_EMAIL, DELAY_REPAY_PASSWORD")
+    
+    return email, password
 
 def validate_ticket_file(ticket_image_path: str) -> bool:
     try:
@@ -162,13 +161,16 @@ async def run_type_a_automation(
         controller = await create_controller()
         print("✅ Controller created for file uploads")
         
+        # Get credentials with validation
+        delay_repay_email, delay_repay_password = get_delay_repay_credentials()
+        
         operator_website = get_operator_website(journey_details["train_operator"])
 
         login_agent = Agent(
-            task=build_login_prompt(operator_website, DELAY_REPAY_EMAIL, DELAY_REPAY_PASSWORD),
+            task=build_login_prompt(operator_website, delay_repay_email, delay_repay_password),
             llm=llm,
             browser=browser,
-            use_vision=True,
+            use_vision=False,
         )
         
         await login_agent.run()

@@ -3,10 +3,18 @@ import json
 import csv
 import os
 from openai import OpenAI
-from dotenv import load_dotenv
 from builders.prompt_builder import build_ticket_extraction_prompt
 
-load_dotenv()
+def get_openai_credentials():
+    """Get OpenAI credentials with fail-fast validation"""
+    api_key = os.environ.get("OPENAI_API_KEY")
+    organization = os.environ.get("OPENAI_ORGANIZATION")
+    project = os.environ.get("OPENAI_PROJECT")
+    
+    if not api_key:
+        raise ValueError("Missing required environment variable: OPENAI_API_KEY")
+    
+    return api_key, organization, project
 
 def get_data_path(filename):
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -137,10 +145,12 @@ def extract_ticket_details(image_path: str) -> dict:
     
     prompt = build_ticket_extraction_prompt()
     
+    api_key, organization, project = get_openai_credentials()
+    
     client = OpenAI(
-        api_key=os.environ.get("OPENAI_API_KEY"),
-        organization=os.environ.get("OPENAI_ORGANIZATION"),
-        project=os.environ.get("OPENAI_PROJECT"),
+        api_key=api_key,
+        organization=organization,
+        project=project,
     )
     
     response = client.chat.completions.create(

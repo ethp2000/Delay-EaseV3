@@ -5,30 +5,40 @@ import asyncio
 import datetime
 from pathlib import Path
 from delay_calculation import calculate_delay_compensation
-from browser_automation_type_a import run_type_a_automation,is_type_a_toc
+from browser_automation_type_a import run_type_a_automation
+from utils import is_type_a_toc
 from dotenv import load_dotenv
 
 load_dotenv()
 
 def get_user_details():
-
-    return {
-        "passenger": {
-            "title": os.environ.get("USER_TITLE", "Mrs"),
-            "first_name": os.environ.get("USER_FIRST_NAME", "Test"),
-            "last_name": os.environ.get("USER_LAST_NAME", "User"),
-            "address_line1": os.environ.get("USER_ADDRESS", "123 Test Street"),
-            "town_city": os.environ.get("USER_CITY", "Test City"),
-            "postcode": os.environ.get("USER_POSTCODE", "TE5T 1NG"),
-            "country": os.environ.get("USER_COUNTRY", "United Kingdom"),
-            "email": os.environ.get("USER_EMAIL", "test@example.com")
-        },
-        "bank": {
-            "account_holder": os.environ.get("USER_ACCOUNT_HOLDER", "Test User"),
-            "sort_code": os.environ.get("USER_SORT_CODE", "12-34-56"),
-            "account_number": os.environ.get("USER_ACCOUNT_NUMBER", "12345678")
-        }
+    """Get user details with fail-fast validation for required fields"""
+    required_user_vars = [
+        "USER_TITLE", "USER_FIRST_NAME", "USER_LAST_NAME", "USER_ADDRESS",
+        "USER_CITY", "USER_POSTCODE", "USER_COUNTRY", "USER_EMAIL",
+        "USER_ACCOUNT_HOLDER", "USER_SORT_CODE", "USER_ACCOUNT_NUMBER"
+    ]
+    
+    missing_vars = [var for var in required_user_vars if not os.environ.get(var)]
+    if missing_vars:
+        raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
+    
+    p = {
+        "title": os.environ["USER_TITLE"],
+        "first_name": os.environ["USER_FIRST_NAME"],
+        "last_name": os.environ["USER_LAST_NAME"],
+        "address_line1": os.environ["USER_ADDRESS"],
+        "town_city": os.environ["USER_CITY"],
+        "postcode": os.environ["USER_POSTCODE"],
+        "country": os.environ["USER_COUNTRY"],
+        "email": os.environ["USER_EMAIL"],
     }
+    b = {
+        "account_holder": os.environ["USER_ACCOUNT_HOLDER"],
+        "sort_code": os.environ["USER_SORT_CODE"],
+        "account_number": os.environ["USER_ACCOUNT_NUMBER"],
+    }
+    return {"passenger": p, "bank": b}
 
 def save_claim_record(user_id: str, ticket_data: dict, claim_reference: str = None) -> str:
     claims_dir = Path("data/claims")
