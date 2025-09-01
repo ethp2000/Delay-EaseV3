@@ -1,16 +1,18 @@
 import os
 import asyncio
+import logging
 from datetime import datetime, timedelta
 from browser_use import Agent, Browser, BrowserProfile, ChatOpenAI
-from delay_calculation import calculate_delay_compensation
-from ticket_data_extraction import extract_ticket_details, get_data_path
-from const import TYPE_A_TOCS, ALLOWED_DOMAINS
-from utils import is_type_a_toc, get_operator_website
-from builders.func_builder import build_file_input_js
-from builders.prompt_builder import build_login_prompt, build_journey_details_prompt, build_ticket_details_prompt, build_review_prompt
+from src.delay_ease.delay_calculation import calculate_delay_compensation
+from src.delay_ease.ticket_data_extraction import extract_ticket_details, get_data_path
+from src.delay_ease.const import TYPE_A_TOCS, ALLOWED_DOMAINS
+from src.delay_ease.utils import is_type_a_toc, get_operator_website
+from src.delay_ease.builders.func_builder import build_file_input_js
+from src.delay_ease.builders.prompt_builder import build_login_prompt, build_journey_details_prompt, build_ticket_details_prompt, build_review_prompt
+
+log = logging.getLogger(__name__)
 
 def get_delay_repay_credentials():
-    """Get delay repay credentials with fail-fast validation"""
     email = os.environ.get("DELAY_REPAY_EMAIL")
     password = os.environ.get("DELAY_REPAY_PASSWORD")
     
@@ -23,19 +25,19 @@ def validate_ticket_file(ticket_image_path: str) -> bool:
     try:
         abs_path = os.path.abspath(ticket_image_path)
         if not os.path.exists(abs_path):
-            print(f"Ticket file does not exist: {abs_path}")
+            log.error(f"Ticket file does not exist: {abs_path}")
             return False
         
         file_size = os.path.getsize(abs_path)
         if file_size == 0:
-            print(f"Ticket file is empty: {abs_path}")
+            log.error(f"Ticket file is empty: {abs_path}")
             return False
             
-        print(f"Ticket file validated: {abs_path} ({file_size} bytes)")
+        log.info(f"Ticket file validated: {abs_path} ({file_size} bytes)")
         return True
         
     except Exception as e:
-        print(f"Error validating ticket file: {str(e)}")
+        log.error(f"Error validating ticket file: {str(e)}")
         return False
 
 def validate_ticket_matches_journey(ticket_image_path: str, journey_details: dict) -> bool:
@@ -47,7 +49,7 @@ def validate_ticket_matches_journey(ticket_image_path: str, journey_details: dic
         extracted_data = extract_ticket_details(ticket_image_path)
         
         if "error" in extracted_data:
-            print(f" SECURITY WARNING: Could not validate ticket - {extracted_data['error']}")
+            log.warning(f"SECURITY WARNING: Could not validate ticket - {extracted_data['error']}")
             return False
         
         ticket_data = extracted_data["segments"][0] if "segments" in extracted_data else extracted_data
@@ -67,21 +69,20 @@ def validate_ticket_matches_journey(ticket_image_path: str, journey_details: dic
         arrival_match = arrival_station.lower() in ticket_arrival.lower() or ticket_arrival.lower() in arrival_station.lower()
         
         if not (date_match and departure_match and arrival_match):
-            print(f"   SECURITY BLOCK: Ticket details don't match journey")
-            print(f"   Journey: {journey_date}, {departure_station} → {arrival_station}")
-            print(f"   Ticket:  {ticket_date}, {ticket_departure} → {ticket_arrival}")
+            log.warning(f"SECURITY BLOCK: Ticket details don't match journey")
+            log.warning(f"Journey: {journey_date}, {departure_station} → {arrival_station}")
+            log.warning(f"Ticket:  {ticket_date}, {ticket_departure} → {ticket_arrival}")
             return False
             
-        print("Ticket matches journey details")
+        log.info("Ticket matches journey details")
         return True
         
     except Exception as e:
-        print(f"SECURITY WARNING: Error validating ticket match - {str(e)}")
+        log.warning(f"SECURITY WARNING: Error validating ticket match - {str(e)}")
         return False
 
 
 async def create_browser():
-    """Create a properly configured browser for delay repay automation"""
     browser = Browser(
         headless=False,
         user_data_dir=None,
@@ -103,28 +104,28 @@ async def create_controller():
     async def upload_ticket(file_path: str, page):
         try:
             if not file_path:
-                print(f"Error: Empty file path provided")
+                log.error("Error: Empty file path provided")
                 return ActionResult(extracted_content="Failed: Empty file path")
                 
             abs_path = os.path.abspath(file_path)
-            print(f"\nAttempting to upload file: {abs_path}")
+            log.info(f"Attempting to upload file: {abs_path}")
             
             if not os.path.exists(abs_path):
-                print(f"Error: File does not exist at path: {abs_path}")
+                log.error(f"Error: File does not exist at path: {abs_path}")
                 return ActionResult(extracted_content=f"Failed: File not found at {abs_path}")
             
-            print(f"File exists and has size: {os.path.getsize(abs_path)} bytes")
+            log.info(f"File exists and has size: {os.path.getsize(abs_path)} bytes")
             
 
             result = await page.evaluate(build_file_input_js())
             if result:
-                print("Made file input visible with JavaScript")
+                log.info("Made file input visible with JavaScript")
                 file_input = await page.wait_for_selector('input[type="file"]', timeout=5000)
                 
                 if file_input:
-                    print(f"Found file input, setting file: {abs_path}")
+                    log.info(f"Found file input, setting file: {abs_path}")
                     await file_input.set_input_files(abs_path)
-                    print("Successfully set input files")
+                    log.info("Successfully set input files")
                     
                     # Brief pause to allow upload to process - EXACT OpenAI timing
                     await asyncio.sleep(2)
@@ -134,14 +135,14 @@ async def create_controller():
                         include_in_memory=True
                     )
                 else:
-                    print("Error: Could not find file input element even after making it visible")
+                    log.error("Error: Could not find file input element even after making it visible")
                     return ActionResult(extracted_content="Failed: Could not find file input element")
             else:
-                print("Error: No file input elements found on page")
+                log.error("Error: No file input elements found on page")
                 return ActionResult(extracted_content="Failed: No file input elements found")
                 
         except Exception as e:
-            print(f"Unexpected error in upload_ticket: {str(e)}")
+            log.error(f"Unexpected error in upload_ticket: {str(e)}")
             return ActionResult(extracted_content=f"Failed to upload ticket: {str(e)}")
     
     return controller
@@ -159,7 +160,7 @@ async def run_type_a_automation(
         llm = ChatOpenAI(model="o3", ) 
         
         controller = await create_controller()
-        print("✅ Controller created for file uploads")
+        log.info("Controller created for file uploads")
         
         # Get credentials with validation
         delay_repay_email, delay_repay_password = get_delay_repay_credentials()
@@ -174,7 +175,7 @@ async def run_type_a_automation(
         )
         
         await login_agent.run()
-        print("Login completed")
+        log.info("Login completed")
         
         journey_date = journey_details["date"]
         departure_time = journey_details["departure_time"]
@@ -192,7 +193,7 @@ async def run_type_a_automation(
         else:
             delay_range = "120+ minutes"
 
-        print(f"Delay: {delay_minutes} minutes → Looking for range: {delay_range}")
+        log.info(f"Delay: {delay_minutes} minutes → Looking for range: {delay_range}")
 
         journey_agent = Agent(
             task=build_journey_details_prompt(journey_date, departure_station, arrival_station, departure_time, delay_range, delay_minutes),
@@ -202,9 +203,9 @@ async def run_type_a_automation(
         )
         
         await journey_agent.run()
-        print("Journey details entered")
+        log.info("Journey details entered")
 
-        print("Starting ticket selection and upload...")
+        log.info("Starting ticket selection and upload...")
         ticket_agent = Agent(
             task=build_ticket_details_prompt(ticket_image_path),
             llm=llm,
@@ -215,9 +216,9 @@ async def run_type_a_automation(
         )
         
         ticket_result = await ticket_agent.run()
-        print(f"Ticket upload completed: {ticket_result}")
+        log.info(f"Ticket upload completed: {ticket_result}")
 
-        print("Starting final review...")
+        log.info("Starting final review...")
         review_agent = Agent(
             task=build_review_prompt(passenger_details, bank_details, departure_station, arrival_station, journey_date, departure_time, delay_minutes),
             llm=llm,
@@ -226,9 +227,9 @@ async def run_type_a_automation(
         )
         
         review_result = await review_agent.run()
-        print(f"Review completed: {review_result}")
+        log.info(f"Review completed: {review_result}")
         
     finally:
         if browser:
             await browser.close()
-            print("Browser session closed")
+            log.info("Browser session closed")

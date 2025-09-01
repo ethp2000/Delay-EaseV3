@@ -1,4 +1,4 @@
-from const import TYPE_A_TOCS
+from src.delay_ease.const import TYPE_A_TOCS
 
 
 def is_type_a_toc(train_operator: str) -> bool:

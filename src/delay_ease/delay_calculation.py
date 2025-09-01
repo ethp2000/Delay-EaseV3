@@ -4,8 +4,11 @@ import datetime
 import requests
 import base64
 import os
-from ticket_data_extraction import extract_ticket_details, get_data_path
-from const import HSP_SERVICE_METRICS_URL, HSP_SERVICE_DETAILS_URL
+from src.delay_ease.ticket_data_extraction import extract_ticket_details, get_data_path
+from src.delay_ease.const import HSP_SERVICE_METRICS_URL, HSP_SERVICE_DETAILS_URL
+import logging
+
+log = logging.getLogger(__name__)
 
 def get_hsp_credentials():
     """Get HSP credentials with fail-fast validation"""
@@ -332,7 +335,7 @@ def calculate_delay_compensation(image_path, toc_csv_filename="toc_code.csv", de
         }
     
     ticket_format = extracted_data.get("ticket_format", "E-ticket")  # default to e-ticket for safety
-    print(f"Detected ticket format: {ticket_format}")
+    log.info(f"Detected ticket format: {ticket_format}")
     
     # mvp: block paper tickets
     if ticket_format == "Paper":

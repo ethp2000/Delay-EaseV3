@@ -3,7 +3,7 @@ import json
 import csv
 import os
 from openai import OpenAI
-from builders.prompt_builder import build_ticket_extraction_prompt
+from src.delay_ease.builders.prompt_builder import build_ticket_extraction_prompt
 
 def get_openai_credentials():
     """Get OpenAI credentials with fail-fast validation"""
