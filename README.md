@@ -1,11 +1,12 @@
 ## Delay-EaseV3
 
-Delay-Ease takes a UK train ticket screenshot, checks if you’re eligible for Delay Repay, and, if eligible, can auto-fill and submit a claim for supported operators.
+DelayEase is a tool that automates Delay Repay claims for UK train passengers. Users upload a screenshot of their ticket, and the system checks whether they’re eligible for compensation using real-time rail data. If eligible, DelayEase extracts the required journey details and submits the claim on their behalf for supported operators.
 
-## Overview
-Delay-EaseV3 streamlines the delay repay process by extracting ticket information from images, checking for delays using real-time data, and (when 
-eligible) automating claim submissions through train operator websites. The system supports Type A train operating companies including CrossCountry, 
-Transport for Wales, TransPennine Express, Great Western Railway, Northern, and South Western Railway.
+Each year, over £11.5 billion is spent on UK train fares, and a significant number of journeys are delayed. Under the Delay Repay scheme, passengers can claim between 25% and 100% of their fare back for delays starting at just 15 minutes. Despite this, less than half of eligible passengers ever claim compensation. This is largely due to the fragmented and time-consuming process, where each train operator has its own system, forms, and requirements. Even platforms like Trainline do not handle the claims directly, instead redirecting users to the relevant train operator’s form.
+
+DelayEaseV3 simplifies the process by accepting a screenshot an Eticket, extracting the relevant ticket and journey information, checking for delays using the HSP API (the UK rail industry’s official performance data), and automatically submitting claims through supported train operator websites.
+
+The system currently supports Type A train operating companies, including CrossCountry, Transport for Wales, TransPennine Express, Great Western Railway, Northern, and South Western Railway.
 
 ### Quickstart 
 ```bash
@@ -53,7 +54,7 @@ make format
 make lint
 ```
 
-### How it works (high level)
+### How it works 
 - Ticket parsing (vision): `src/delay_ease/ticket_data_extraction.py`
   - Uses OpenAI Vision to read an e‑ticket image and extract: date, departure/arrival stations, times, format, etc.
   - Validates against `data/reference_data/stations.csv` to align station names and CRS codes.
