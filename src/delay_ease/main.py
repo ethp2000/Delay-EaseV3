@@ -230,7 +230,7 @@ def main():
 
 def test_eticket_test():
     
-    TEST_TICKET_FILE = "eticket_test3.png"  
+    TEST_TICKET_FILE = "eticket_test1.png"  
 
     print(f"TESTING DELAY EASE WITH {TEST_TICKET_FILE}")
     

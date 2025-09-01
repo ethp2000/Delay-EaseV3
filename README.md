@@ -1,82 +1,42 @@
-# Delay-EaseV3
+## Delay-EaseV3
 
-An automated delay repay system for UK train operators that processes ticket images, calculates delay compensation, and submits claims automatically.
+Delay-Ease takes a UK train ticket screenshot, checks if you’re eligible for Delay Repay, and, if eligible, can auto-fill and submit a claim for supported operators.
 
 ## Overview
+Delay-EaseV3 streamlines the delay repay process by extracting ticket information from images, checking for delays using real-time data, and (when 
+eligible) automating claim submissions through train operator websites. The system supports Type A train operating companies including CrossCountry, 
+Transport for Wales, TransPennine Express, Great Western Railway, Northern, and South Western Railway.
 
-Delay-EaseV3 streamlines the delay repay process by extracting ticket information from images, checking for delays using real-time data, and (when eligible) automating claim submissions through train operator websites. The system supports Type A train operating companies including CrossCountry, Transport for Wales, TransPennine Express, Great Western Railway, Northern, and South Western Railway.
+## Quickstart
 
-## Getting Started
-
-- Requirements
-  - Python 3.11+
-  - Poetry
-  - OpenAI API access (model `gpt-4.1`)
-  - HSP API credentials (for delay verification)
-  - Delay Repay portal credentials (for automation)
-  - Playwright Chromium browser installed (used by the automation layer)
-
-- Install
 ```bash
-cd /Users/ethanphillips/Desktop/Delay-EaseV3
-poetry install
-poetry run playwright install chromium
-```
-
-- Environment
-```bash
+poetry install && poetry run playwright install chromium
 cp env_example.txt .env
-# Then edit .env and set at least:
-OPENAI_API_KEY=...
-# optional:
-OPENAI_ORGANIZATION=...
-OPENAI_PROJECT=...
-# HSP API (required for delay verification)
-HSP_EMAIL=...
-HSP_PASSWORD=...
-# Delay Repay login (required for automation)
-DELAY_REPAY_EMAIL=...
-DELAY_REPAY_PASSWORD=...
-# Passenger + bank details (required for automation)
-USER_TITLE=Mr/Ms
-USER_FIRST_NAME=...
-USER_LAST_NAME=...
-USER_ADDRESS=...
-USER_CITY=...
-USER_POSTCODE=...
-USER_COUNTRY=UK
-USER_EMAIL=...
-USER_ACCOUNT_HOLDER=...
-USER_SORT_CODE=00-00-00
-USER_ACCOUNT_NUMBER=00000000
+poetry run python src/delay_ease/main.py data/test_tickets/eticket_test2.png
 ```
+
+## Requirements
+- Python 3.11+
+- Poetry
+- OpenAI API key
+- HSP credentials (for delay verification)
+- Playwright Chromium (for browser automation via `browser-use`) [[memory:7739255]]
+
+## Environment
+Edit `.env` (copied from `env_example.txt`):
+- Minimum to extract + check delay:
+  - OPENAI_API_KEY
+  - HSP_EMAIL, HSP_PASSWORD
+- Needed for automated claim submission:
+  - DELAY_REPAY_EMAIL, DELAY_REPAY_PASSWORD
+  - USER_* (title, name, address, email, bank account holder/sort code/account)
 
 ## Usage
 
-- Run with a ticket image
+- Run the main function with a ticket image:
 ```bash
 poetry run python src/delay_ease/main.py data/test_tickets/eticket_test1.png
 ```
-
-- Run with a ticket image and custom user id
-```bash
-poetry run python src/delay_ease/main.py data/test_tickets/eticket_test1.png my_user_123
-```
-
-- Built-in test mode (uses a sample test ticket)
-```bash
-poetry run python src/delay_ease/main.py
-# or
-poetry run python src/delay_ease/main.py test
-```
-
-Outputs are saved to `data/results/` and claim records to `data/claims/`.
-
-## Notes
-
-- Paper tickets are currently blocked; use e-tickets or m-tickets.
-- Supported Type A operators: CrossCountry, Transport for Wales, TransPennine Express, Great Western Railway, Northern, South Western Railway (incl. Island Line).
-- Automation uses `browser-use` with Playwright Chromium; ensure the browser install step above has been run.
 
 ## Main Scripts
 
