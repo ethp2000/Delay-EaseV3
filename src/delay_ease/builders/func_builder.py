@@ -16,5 +16,3 @@ def build_file_input_js() -> str:
                 return false;
             })();
             """
-
- 

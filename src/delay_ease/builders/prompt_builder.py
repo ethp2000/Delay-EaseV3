@@ -1,38 +1,32 @@
-
-
 def build_ticket_extraction_prompt() -> str:
     prompt = (
         "Analyze this train ticket image. First, determine if this is a PAPER ticket or an E-TICKET/M-TICKET:\n"
         "- Paper tickets: Physical tickets that were printed on paper/cardstock, scanned or photographed\n"
         "- E-tickets/M-tickets: Digital tickets displayed on phone/computer screens, screenshots, or digital PDFs\n\n"
-        
         "If the ticket shows a single journey leg, "
         "return a JSON dictionary with these keys exactly: "
         "'ticket_format' (either 'Paper' or 'E-ticket'), "
         "'ticket_date', 'departure_time', 'departure_station', 'departure_crs', "
         "'arrival_station', 'arrival_crs', 'ticket_type', 'railcard', and 'ctr'. "
-        
         "If the ticket shows multiple segments, return a JSON dictionary with one key 'segments', "
         "whose value is an array of dictionaries, each with the same keys as above (including 'ticket_format'). "
-        
         "Formatting rules (mandatory): "
         "ticket_date MUST be 'DD Mon YYYY' (e.g., '10 Jul 2025') — do NOT use 'YYYY-MM-DD' or 'DD/MM/YYYY'. "
         "departure_time MUST be 24-hour 'HH:MM' with leading zeros (e.g., '09:05'). "
-        
         "If the ticket mentions 'London Terminals' but also includes a seat reservation or itinerary "
         "showing a more specific arrival station (e.g., 'London King's Cross'), use that specific station "
         "in 'arrival_station' and the corresponding station code (e.g., 'KGX') in 'arrival_crs'. "
-        
         "IMPORTANT: Be very accurate about ticket_format - this determines if the automation will proceed. "
         "Paper tickets should only be marked as 'Paper' if they are clearly physical tickets that were scanned. "
         "Screenshots, mobile displays, or digital images should be marked as 'E-ticket'. "
-        
         "Return only valid JSON. Do not include any code blocks, triple backticks, or extra text."
     )
     return prompt
 
 
-def build_login_prompt(operator_website: str, DELAY_REPAY_EMAIL: str, DELAY_REPAY_PASSWORD: str) -> str:
+def build_login_prompt(
+    operator_website: str, DELAY_REPAY_EMAIL: str, DELAY_REPAY_PASSWORD: str
+) -> str:
     login_task = f"""
 Navigate to the delay repay website and log in:
 
@@ -54,10 +48,16 @@ IMPORTANT RULES:
 - Wait for each page to fully load before proceeding
 """
     return login_task
-    
 
 
-def build_journey_details_prompt(journey_date: str, departure_station: str, arrival_station: str, departure_time: str, delay_range: str, delay_minutes: int) -> str:
+def build_journey_details_prompt(
+    journey_date: str,
+    departure_station: str,
+    arrival_station: str,
+    departure_time: str,
+    delay_range: str,
+    delay_minutes: int,
+) -> str:
     journey_task = f"""
 CRITICAL: You are already logged in and on the delay repay website. DO NOT navigate away from this website.
 
@@ -113,7 +113,15 @@ IMPORTANT:
     return ticket_task
 
 
-def build_review_prompt(passenger_details: dict, bank_details: dict, departure_station: str, arrival_station: str, journey_date: str, departure_time: str, delay_minutes: int) -> str:
+def build_review_prompt(
+    passenger_details: dict,
+    bank_details: dict,
+    departure_station: str,
+    arrival_station: str,
+    journey_date: str,
+    departure_time: str,
+    delay_minutes: int,
+) -> str:
     review_task = f"""
 Complete the final stages,reveiw and details for delay repay claim:
 

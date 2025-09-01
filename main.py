@@ -1,15 +1,18 @@
+import datetime
+import json
+import logging
 import os
 import sys
-import json
-import datetime
-import logging
 from pathlib import Path
 from typing import Optional
+
 import typer
 from dotenv import load_dotenv
+
 from src.delay_ease.service import process_single_ticket
 
 load_dotenv()
+
 
 def setup_logging(level: int = logging.INFO) -> None:
     logging.basicConfig(
@@ -18,10 +21,12 @@ def setup_logging(level: int = logging.INFO) -> None:
         stream=sys.stdout,
     )
 
+
 setup_logging()
 
 log = logging.getLogger(__name__)
 app = typer.Typer()
+
 
 @app.command()
 def run(
@@ -50,19 +55,16 @@ def run(
     log.info(f"Full result saved to: {result_file}")
 
 
-
 def test_eticket_test():
-    
-    TEST_TICKET_FILE = "eticket_test3.png"  
+
+    TEST_TICKET_FILE = "eticket_test1.png"
 
     log.info(f"TESTING DELAY EASE WITH {TEST_TICKET_FILE}")
-    
+
     test_image_path = f"data/test_tickets/{TEST_TICKET_FILE}"
     test_user_id = f"test_user_{TEST_TICKET_FILE.replace('.png', '')}"
-    
- 
+
     result = process_single_ticket(test_image_path, test_user_id)
-    
 
     log.info("TEST RESULTS SUMMARY")
     log.info(f"Tested: {TEST_TICKET_FILE}")
@@ -70,8 +72,9 @@ def test_eticket_test():
     log.info(f"TOC: {result.get('train_operator', 'Unknown')}")
     log.info(f"Delay: {result.get('delay_minutes', 'Unknown')} minutes")
     log.info(f"Compensation: {result.get('compensation_percentage', 'Unknown')}")
-    
+
     return result
+
 
 if __name__ == "__main__":
     app()
