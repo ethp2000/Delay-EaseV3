@@ -150,23 +150,22 @@ def get_delay_repay_percentage(delay_minutes: float, operator: str, csv_filename
         return "Unknown"
 
 def get_detailed_status_message(delay_minutes: float, operator: str, days_old: int, compensation_pct: str) -> dict:
-    # TEST OVERRIDE: Temporarily disable 28-day claim window block
-    # if days_old > 28:
-    #     return {
-    #         "status": "ineligible_age",
-    #         "message": f"Your journey was {days_old} days ago, which exceeds the 28-day claim window. UK delay repay claims must be submitted within 28 days of travel.",
-    #         "next_action": "learn_more",
-    #         "learn_more_topic": "claim_deadlines"
-    #     }
-    
+    if days_old > 28:
+        return {
+            "status": "ineligible_age",
+            "message": f"Your journey was {days_old} days ago, which exceeds the 28-day claim window. UK delay repay claims must be submitted within 28 days of travel.",
+            "next_action": "learn_more",
+            "learn_more_topic": "claim_deadlines"
+        }
+
     min_delay = get_toc_minimum_delay(operator)
-    
+
     if delay_minutes < min_delay:
         if min_delay == 999:
             return {
                 "status": "ineligible_no_compensation",
                 "message": f"{operator} does not offer delay repay compensation for any delay duration.",
-                "next_action": "learn_more", 
+                "next_action": "learn_more",
                 "learn_more_topic": "toc_policies"
             }
         else:
@@ -176,7 +175,7 @@ def get_detailed_status_message(delay_minutes: float, operator: str, days_old: i
                 "next_action": "learn_more",
                 "learn_more_topic": "toc_policies"
             }
-    
+
     if compensation_pct == "0%":
         return {
             "status": "ineligible_bracket",
@@ -184,14 +183,14 @@ def get_detailed_status_message(delay_minutes: float, operator: str, days_old: i
             "next_action": "learn_more",
             "learn_more_topic": "compensation_brackets"
         }
-    
+
     return {
         "status": "eligible",
         "message": f"Great news! Your {delay_minutes}min delay with {operator} qualifies for {compensation_pct} compensation. We're processing your claim automatically.",
         "next_action": "proceed_claim",
         "compensation_percentage": compensation_pct
     }
-
+    
 def process_ticket_delay(ticket_data, toc_csv_filename="toc_code.csv", delay_csv_filename="delay_repay_percentages_single_tickets.csv") -> dict:
     tok_codes = load_tok_codes(toc_csv_filename)
     departure_crs = ticket_data["departure_crs"]

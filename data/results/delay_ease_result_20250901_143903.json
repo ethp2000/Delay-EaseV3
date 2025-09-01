@@ -1,0 +1,17 @@
+{
+  "ticket_date": "15 Mar 2025",
+  "departure_time": "13:40",
+  "departure_station": "Oakham",
+  "departure_crs": "OKM",
+  "arrival_station": "London Kings Cross",
+  "arrival_crs": "KGX",
+  "ticket_type": "Super Off-Peak Single",
+  "railcard": "16-25 Railcard",
+  "ctr": "TTGB3BT4QJJ",
+  "delay_status": "No matching services",
+  "ticket_format": "E-ticket",
+  "status": "error_no_services",
+  "message": "No matching train services found for your journey. This may be due to incomplete schedule data.",
+  "next_action": "manual_check",
+  "image_path": "/Users/ethanphillips/Desktop/Delay-EaseV3/data/test_tickets/eticket_test2.png"
+}

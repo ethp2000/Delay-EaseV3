@@ -228,11 +228,9 @@ def main():
 
 
 
-
-
 def test_eticket_test():
     
-    TEST_TICKET_FILE = "eticket_test1.png"  # Change to any ticket in test_tickets/
+    TEST_TICKET_FILE = "eticket_test3.png"  
 
     print(f"TESTING DELAY EASE WITH {TEST_TICKET_FILE}")
     
